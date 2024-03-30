@@ -16,9 +16,11 @@ func TestNewLogger(t *testing.T) {
 		lv  *logger.LogLevels
 		env map[string]string
 	}
+
 	type want struct {
 		level zapcore.Level
 	}
+
 	tests := map[string]struct {
 		args args
 		want want
