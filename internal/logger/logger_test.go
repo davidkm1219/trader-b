@@ -57,6 +57,8 @@ func TestNewLogger(t *testing.T) {
 	}
 
 	for name, tt := range tests {
+		tt := tt
+
 		t.Run(name, func(t *testing.T) {
 			for k, v := range tt.args.env {
 				t.Setenv(k, v)
