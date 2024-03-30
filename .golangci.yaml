@@ -1,0 +1,246 @@
+---
+issues:
+  # Unfortunately, GolangCI Lint disables rules we want (like: comment checking, switch break), so we have to re-declare the excluded rules ourselves
+  # Otherwise, these exclusion rules are pulled directly from GolangCI Lint's docs (with escaping modified for toml)
+  exclude: [
+    # errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
+    "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked",
+
+    # golint: False positive when tests are defined in package 'test'
+    "func name will be used as test\\.Test.* by other packages, and that stutters; consider calling this",
+
+    # govet: Common false positives
+    "(possible misuse of unsafe.Pointer|should have signature)",
+
+    # gosec: Too many false-positives on 'unsafe' usage
+    "Use of unsafe calls should be audited",
+
+    # gosec: Too many false-positives for parametrized shell calls
+    "Subprocess launch(ed with variable|ing should be audited)",
+
+    # gosec: Duplicated errcheck checks
+    "G104",
+
+    # gosec: Too many issues in popular repos
+    "(Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)",
+
+    # gosec: False positive is triggered by 'src, err := ioutil.ReadFile(filename)'
+    "Potential file inclusion via variable",
+  ]
+  exclude-rules:
+    # Tests shouldn't need to wrap errors in many cases
+    - linters:
+        - wrapcheck
+      path: _test\.go
+    # HTTP response bodies don't need to be closed on httptest.ResponseRecorder types.
+    # Excluding here won't just match those cases unfortunately, but don't have a better option than just disabling in all _test.go files
+    - linters:
+        - bodyclose
+      path: _test\.go
+    # Unclear why 'replace' should be disallowed, and replacements have been necessary in existing apps without an easy 'allow' list
+    - linters:
+        - gomoddirectives
+      text: replacement are not allowed
+  exclude-use-default: false
+  # Disable limits on max issues, ensuring that everything is reported.
+  # This is especially important when ignoring issues since X commit, as many exisitng issues may suppress new issues too
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-dirs: [
+    "generated"
+  ]
+  exclude-files: [
+    "(.*\\.|^)generated.*\\.go"
+  ]
+
+
+linters:
+  # GolangCI Lint recommend against enabling by default with selective disabling. This is because new linters are added
+  # with new releases, and having those enabled automatically 'is not scalable'.
+  # For us, we want to be selective about the linters that are enabled: GolangCI Lint is very permissive in the linters it
+  # allows to be added, and many we don't want to use
+  # As such, disable everything, then re-enable just the ones we want to use
+  disable-all: true
+  # Linters we opt out of (alphabetically):
+  #
+  # `asciicheck`
+  #       Checks that your code does not contain non-ASCII identifiers. Seems to be a very endge case.
+  #
+  # `dupl`
+  #       dupl raises failures for code duplication, where often it's better to leave the duplication rather than refactor
+  #       Refactoring to remove the duplication often makes the code harder to change in the future
+  #       'Duplication is far cheaper than the wrong abstraction' see https://www.sandimetz.com/blog/2016/1/20/the-wrong-abstraction
+  #
+  # `exhaustive`
+  #       Detect enum switch statements that are not exhaustive. An enum switch statement is exhaustive if it has cases for
+  #       each of the enum's members. This doesn't work well with protobuf enums as it reports missing cases for _INVALID
+  #
+  # `funlen`
+  #       https://github.com/golang/go/wiki/CodeReviewComments#line-length
+  #       > There's no rule "never have a function more than N lines long", but there is definitely such a thing as too long
+  #       > of a function, and of too stuttery tiny functions, and the solution is to change where the function boundaries
+  #       > are, not to start counting lines.
+  #
+  # `gci`
+  #       Tool that control golang package import order, should be handled by goimports.
+  #
+  # `go-err113`
+  #       Comparison part looks good, but another rule requires to define constants for all errors, thus disallow usage
+  #       of errors.New(), fmt.Errorf(), etc.
+  #       > error should not be created dynamically from scratch but by the wrapping the static (package-level) error.
+  #
+  # `go-header`
+  #       Providing checks for license headers, limited value.
+  #
+  # `godot`
+  #       Checks that comments end with a full stop. Has a limited value.
+  #
+  # `godox`
+  #       GoDox flags comments that include "TODO", "BUG" or "FIXME", which we intentionally include for planned future fixes
+  #       When we declare these, we should always include the ticket which will address that problem, but having them is ok
+  #
+  # `golint`
+  #       `revive` implements a superset of this
+  #
+  # `gomodguard`
+  #       Seems to do the same job as depcheck.
+  #
+  # `goprintffuncname`
+  #       Checks that printf-like functions are named with `f` at the end.
+  #
+  # `importas`
+  #       Would require exhaustively listing the aliases we want to enforce. Can revisit later.
+  #
+  # `interfacer`
+  #       Interfacer has been deprecated by it's creator/maintainer:
+  #       'prone to bad suggestions, so its usefulness in real code is limited'
+  #
+  # `lll`
+  #       We do not enforce a limit on line length
+  #       https://github.com/golang/go/wiki/CodeReviewComments#line-length
+  #
+  # `maligned`
+  #       Deprecated, suggests using govet 'fieldalignment' instead.
+  #       Disable struct memory alignment checks - we prefer sorting alphabetically
+  #
+  # `nlreturn`
+  #       Requires a new line before return which is already enforced by wsl linter.
+  #
+  # `paralleltest`
+  #       False positives for table driven tests that use a map where keys are the test names
+  #
+  # `scopelint`
+  #       Deprecated, replaced by using either `looppointer` or `exportloopref` based on requirements
+  #
+  # `tagliatelle`
+  #       Lints struct tags which is nice for consistency, but will flag a lot of things which aren't necessarily an
+  #       issue, especially when dealing with things like decoding of JSON for 3rd-party defined APIs
+  #
+  # `whitespace`
+  #       Very basic whitespace linting, which WSL will support better in a future release
+  enable: [
+    "bodyclose",
+    "dogsled",
+    "durationcheck",
+    "errcheck",
+    "errorlint",
+    "exportloopref",
+    "forbidigo",
+    "forcetypeassert",
+    "gochecknoglobals",
+    "gochecknoinits",
+    "gocognit",
+    "goconst",
+    "gocritic",
+    "gocyclo",
+    "gofumpt",
+    "goimports",
+    "gomnd",
+    "gomoddirectives",
+    "gosec",
+    "gosimple",
+    "govet",
+    "ineffassign",
+    "makezero",
+    "misspell",
+    "nakedret",
+    "nestif",
+    "nilerr",
+    "noctx",
+    "nolintlint",
+    "prealloc",
+    "predeclared",
+    "promlinter",
+    "revive",
+    "rowserrcheck",
+    "sqlclosecheck",
+    "staticcheck",
+    "stylecheck",
+    "testpackage",
+    "thelper",
+    "tparallel",
+    "typecheck",
+    "unconvert",
+    "unparam",
+    "unused",
+    "wastedassign",
+    "wrapcheck",
+    "wsl",
+  ]
+
+linters-settings:
+  errcheck:
+    check-blank: true
+
+  gocritic:
+    enabled-tags: [
+      "diagnostic",
+      "experimental",
+      "performance",
+      "style",
+    ]
+
+  gocyclo:
+    min-complexity: 10
+
+  gomnd:
+    settings:
+      mnd:
+        # Ignore 'assign': these are common, and clear in use e.g. timeout := 5 * time.Second
+        checks: "argument,case,condition,operation,return"
+
+  govet:
+    shadow: true
+
+  nakedret:
+    # Don't allow naked return, EVER
+    max-func-lines: 0
+
+  nestif:
+    # Lowering minimal complexity to report 2-level deep nested if, given that most of the cases could be simplified.
+    # Note: this setting also disallows usage of if {} else if {} else {} construct.
+    min-complexity: 2
+
+  wrapcheck:
+    ignoreSigs:
+      # Default config. See https://github.com/tomarrell/wrapcheck/blob/v2.2.0/wrapcheck/wrapcheck.go
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+      # gRPC handlers must return gRPC status errors
+      # Unfortunately ignorePackageGlobs can't be used with this when vendored dependencies are used w/o configuring the entire path
+      - status.Error(
+      - status.Errorf(
+      - status.New(
+      - status.Status).Err()
+      - tracing.SetErrOnSpan( # Accepts the error (should already be wrapped) and returns it verbatim after updating the tracing span
+
+run:
+  # While we don't _want_ linting to take this long, it's better to give some additional time for the task to complete.
+  # This allows cases like when CI is under resource contention to complete, rather than failing the build with a timeout.
+  timeout: "10m"
