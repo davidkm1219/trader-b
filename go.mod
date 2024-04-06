@@ -1,4 +1,4 @@
-module github.com/twk/skeleton-go-cli
+module github.com/twk/trader-b
 
 go 1.22.1
 

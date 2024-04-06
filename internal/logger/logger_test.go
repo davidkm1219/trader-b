@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 
-	"github.com/twk/skeleton-go-cli/internal/logger"
+	"github.com/twk/trader-b/internal/logger"
 )
 
 func TestNewLogger(t *testing.T) {

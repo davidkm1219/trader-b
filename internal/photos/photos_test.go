@@ -11,8 +11,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/twk/skeleton-go-cli/internal/photos"
-	mock_photos "github.com/twk/skeleton-go-cli/internal/photos/mocks"
+	"github.com/twk/trader-b/internal/photos"
+	mock_photos "github.com/twk/trader-b/internal/photos/mocks"
 	"go.uber.org/zap"
 )
 

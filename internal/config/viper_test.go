@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/twk/skeleton-go-cli/internal/config"
+	"github.com/twk/trader-b/internal/config"
 )
 
 func TestViper_BuildConfig(t *testing.T) {
