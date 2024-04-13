@@ -8,9 +8,9 @@ import (
 	binance_connector "github.com/binance/binance-connector-go"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	mock_binance "github.com/twk/trader-b/internal/connector/binance/mocks"
 
 	"github.com/twk/trader-b/internal/connector/binance"
+	mock_binance "github.com/twk/trader-b/internal/connector/binance/mocks"
 )
 
 func TestAccountService_GetAccount(t *testing.T) {
