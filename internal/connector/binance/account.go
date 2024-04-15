@@ -7,11 +7,6 @@ import (
 	binance_connector "github.com/binance/binance-connector-go"
 )
 
-// AccountClient is a client for interacting with the Binance account.
-type AccountClient interface {
-	Do(ctx context.Context, opts ...binance_connector.RequestOption) (res *binance_connector.AccountResponse, err error)
-}
-
 // AccountService is a service for interacting with the Binance account.
 type AccountService struct {
 	client AccountClient
